@@ -12,13 +12,10 @@ class ProductTypeController extends Controller
      */
     public function index()
     {
-
         $data = ProductType::all();
-
-        return response ([
-            'id' => 1,
-            'type_name' => "successfully"
-
+        return response([
+            "message" => "product type list",
+            "data" => $data,
         ]);
     }
 
@@ -31,14 +28,13 @@ class ProductTypeController extends Controller
             'type_name' => 'required|unique:product_types,type_name',
         ], [
             'type_name.required' => 'is required',
-            'type_name.unique' => 'already exist',
+            'type_name.unique' => 'already exists',
+        ]);
+        ProductType::create([
+            'type_name' => $request->type_name,
         ]);
 
-        $productType = ProductType::create([
-            'type_name' => $request->type_name
-        ]);
-
-        return response(["masseage" => "Product type created succesfully!"],201);
+        return response(["message" => "product type created succesfully"],201);
     }
 
     /**
@@ -46,19 +42,20 @@ class ProductTypeController extends Controller
      */
     public function show(string $id)
     {
+       
         $data = ProductType::find($id);
-
         if (is_null($data)){
-            return response ([
-                'message' => 'error Not Found',
-                'data' => [],
-            ], 404);
+            return response([
+                "message" => "product type not found",
+                "data" => [],
+            ],404);
         }
 
-        return response ([
-            'message' => 'Product Type',
-            'data' => $data,
-        ]);
+
+        return response([
+            "mesage" => "product type list",
+            "data" => $data,
+        ]); 
     }
 
     /**
@@ -71,18 +68,15 @@ class ProductTypeController extends Controller
         ]);
 
         $data = ProductType::find($id);
-
         if (is_null($data)){
-            return response ([
-                'message' => 'error Not Found',
-                'data' => [],
-            ], 404);
+            return response([
+                "message" => "product type not found",
+                "data" => [],
+            ],404);
         }
-
         $data->type_name = $request->type_name;
         $data->save();
-
-        return response(['message => "Product Type update'], 200);
+        return response(["message" => "product type update succes"],200);        
     }
 
     /**
@@ -91,19 +85,18 @@ class ProductTypeController extends Controller
     public function destroy(string $id)
     {
         $data = ProductType::find($id);
-
         if (is_null($data)){
-            return response ([
-                'message' => 'error Not Found',
-                'data' => [],
-            ], 404);
+            return response([
+                "message" => "product type not found",
+                "data" => [],
+            ],404);
         }
 
         $data->delete();
 
-        return response ([
-            'message' => 'Product is deleted success',
-            'data' => $data,
-        ]);
+        return response([
+            "mesage" => "product type list",
+            "data" => $data,
+        ]);    
     }
 }

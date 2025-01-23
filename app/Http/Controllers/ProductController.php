@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Models\product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -12,7 +12,14 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $data = Product::join('product_types', 'products.product_type_id', '=', 'product_types.id')
+        ->select('products.*', 'product_types.type_name')
+        ->get();
+        return response([
+            "message" => "product type list",
+            "data" => $data,
+        ]);
+      
     }
 
     /**
@@ -21,17 +28,16 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'product_type_id' => 'required|exists:product_type_id',
-            'products_name' => 'required|unique:products,products_name',
+            'product_type_id' => 'required|exists:product_types,id',
+            'products_name' => 'required|UNIQUE:products,products_name',
             'description' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|numeric',
-            'img_url' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+            'img_url' => 'required|image|mimes:jpeg,jpg,png,gif,svg|max:2048',
+        ]);  
+        $imagename = time().'.'.$request->img_url->extension();
 
-        $imageName = time().'.'.$request->img_url->extension();
-
-        $request->img_url->move(public_path('images'), $imageName);
+        $request->img_url->move(public_path('image'), $imagename);
 
         Product::create([
             'product_type_id' => $request->product_type_id,
@@ -39,11 +45,11 @@ class ProductController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'stock' => $request->stock,
-            'img_url' => url('/images/'.$imageName),
-            'img_name' => $imageName,
+            'img_url' => url('/images/'.$imagename),
+            'img_name' =>$imagename
         ]);
 
-        return response(["message" => "Product is created successfully"], 201);
+        return response(["message" => "product name created succesfully"],201);
     }
 
     /**
@@ -51,7 +57,18 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        //
+        
+        $data = Product::find($id);
+        if (is_null($data)){
+            return response([
+                "message" => "product type not found",
+                "data" => [],
+            ],404);
+        }
+        return response([
+            "mesage" => "product type list",
+            "data" => $data,
+        ]); 
     }
 
     /**
@@ -59,7 +76,35 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'product_type_id' => 'required',
+            'products_name' => 'required|unique:products,products_name',
+            'description' => 'required',
+            'price' => 'required|numeric',
+            'stock' => 'required|numeric',
+            'img_url' => 'required|image|mimes:jpeg,jpg,png,gif,svg|max:2048',
+        ]);  
+        
+
+        $data = Product::find($id);
+        if (is_null($data)){
+            return response([
+                "message" => "product type not found",
+                "data" => [],
+            ],404);
+        }
+        $imageName = time().'.'.$request->img_url->extension();
+        $request->img_url->move(public_path('image'), $imageName);
+
+        $data->product_type_id = $request->product_type_id;
+        $data->products_name = $request->products_name;
+        $data->description = $request->description;
+        $data->price = $request->price;
+        $data->stock = $request->stock;
+        $data->img_url = $request->img_url;
+        $data->img_name = $imageName;
+        $data->save();
+        return response(["message" => "product type update succes"],200);
     }
 
     /**
@@ -67,6 +112,20 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        
+        $data = Product::find($id);
+        if (is_null($data)){
+            return response([
+                "message" => "product type not found",
+                "data" => [],
+            ],404);
+        }
+
+        $data->delete();
+
+        return response([
+            "mesage" => "product type list",
+            "data" => $data,
+        ]);
     }
 }
